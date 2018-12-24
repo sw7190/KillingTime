@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        *{margin:0; padding:0;}
+        canvas{border: 1px solid black; position: relative;left:50%;transform: translateX(-50%);top:50px;background-color: rgba(0,0,0,0.5)}
+    </style>
+</head>
+<body>
+    <canvas width="1000" height="500" id="c"></canvas>
+</body>
+<script>
+
+    const c = document.getElementById("c");
+    const ctx = c.getContext("2d");
+
+    class Ball {
+
+        constructor() {
+            this.speed = 0.3; // 댕그라미 속도
+            this.size = 3; // 댕그라미 크기
+            this.range = 100; // 연결이 가능한 범위
+            this.color = "#aaa"; // 색깔
+            this.Xspeed = this.speed; // 현재 이동하는 x +-
+            this.Yspeed = this.speed; // 현재 이동하는 y +-
+            this.x = this.random(this.size, c.width - this.size); // 시작 x
+            this.y = this.random(this.size, c.height - this.size); // 시작 y
+        }
+
+        // min ~ max 사이의 랜덤값
+        random(min, max){
+            return Math.random() * (max - min + 1) + min;
+        }
+
+        // 자신과 연결이 가능한지
+        connect(x, y) {
+            return (Math.abs(x - this.x) <= this.range) && (Math.abs(y - this.y) <= this.range) ? true : false;
+        }
+
+        // x가 최대값 또는 최소값일때 
+        Xcheck() {
+            if(((this.x + this.size) >= c.width) || this.x <= this.size){
+                this.Xspeed *= -1;
+                this.x = (this.x + this.size) >= c.width ? c.width - this.size : this.size;
+            }
+        }
+
+        // y가 최대값 또는 최소값일때 
+        Ycheck() {
+            if(((this.y + this.size) >= c.height) || this.y <= this.size){
+                this.Yspeed *= -1;
+                this.y = (this.y + this.size) >= c.height ? c.height - this.size : this.size;
+            }
+        }
+        
+        //댕그라미 그리기
+        fill() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+    }
+
+    class Play {
+        constructor() {
+            this.start = this.start.bind(this); // start메소드에 this 바인드
+            this.length = 70; //댕그라미 최대 갯수
+            this.ball = []; // 댕그라미 저장
+            this.init(); // 댕그라미 생성
+            this.start(); // 실행
+        }
+
+        init() {
+            for(let i = 0; i < this.length; i++ ){
+                const ball = new Ball();
+
+                if(ball.random(0,10) >= 5){
+                    ball.Xspeed *= -1;
+                    ball.Yspeed *= -1;
+                }
+
+                ball.fill();
+                this.ball.push(ball);
+            }
+        }
+
+        line(ball) {
+            let count = 0;
+            const max = 3; // 최대 연결 가능한 라인
+
+            for(let i = 0; i < this.length; i++){
+                if(ball == this.ball[i]) continue;
+                if(count >= max) break;
+
+                const tempBall = this.ball[i];
+
+                if(ball.connect(tempBall.x, tempBall.y)){
+                    ctx.moveTo(ball.x, ball.y);
+                    ctx.lineTo(tempBall.x, tempBall.y);
+                    ctx.strokeStyle = ball.color;
+                    ctx.stroke();
+                    count++;
+                }
+
+            }
+
+        }
+
+        start() {
+            requestAnimationFrame(this.start);
+            ctx.clearRect(0, 0, c.width, c.height);
+
+            for(let i = 0; i < this.length; i++ ){
+                const ball = this.ball[i];
+                ball.x += ball.Xspeed;
+                ball.y += ball.Yspeed;
+
+                ball.Xcheck();
+                ball.Ycheck();
+
+                this.line(ball);
+
+                ball.fill();
+                this.ball.push(ball);
+            }
+
+        }
+
+    }
+    
+    const play = new Play();
+
+</script>
+</html>
