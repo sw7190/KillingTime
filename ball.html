@@ -45,7 +45,7 @@
         Xcheck() {
             if(((this.x + this.size) >= c.width) || this.x <= this.size){
                 this.Xspeed *= -1;
-                this.x = (this.x + this.size) >= c.width ? c.width - this.size : this.size;
+                this.x += this.Xspeed;
             }
         }
 
@@ -53,7 +53,7 @@
         Ycheck() {
             if(((this.y + this.size) >= c.height) || this.y <= this.size){
                 this.Yspeed *= -1;
-                this.y = (this.y + this.size) >= c.height ? c.height - this.size : this.size;
+                this.y += this.Yspeed;
             }
         }
         
