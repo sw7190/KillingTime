@@ -15,18 +15,18 @@
 </body>
 <script>
 
-    const c = document.getElementById("c");
+const c = document.getElementById("c");
     const ctx = c.getContext("2d");
 
     class Ball {
 
         constructor(x = null, y = null, isMouse = false) {
             this.speed = 0.3;
-            this.size = 3;
+            this.size = this.random(2, 10);
             this.range = isMouse ? 150 : 100;
             this.color = "#"  +  Math.floor(Math.random() * 16777215).toString(16);;
-            this.Xspeed = this.random(0, 10) <= 5 ? this.speed : this.speed *= -1;
-            this.Yspeed = this.random(0, 10) <= 5 ? this.speed : this.speed *= -1;
+            this.Xspeed = this.random(-1, 1);
+            this.Yspeed = this.random(-1, 1);
             this.isMouse = isMouse;
             this.x = x || this.random(this.size, c.width - this.size);
             this.y = y || this.random(this.size, c.height - this.size);
@@ -111,8 +111,10 @@
         }
 
         addBall(e) {
+          for (let i = 0 ; i < 4; i++) {
             const ball = new Ball(e.offsetX, e.offsetY);
             this.createBall(ball);
+          }
         }
 
         line(ball) {
@@ -128,7 +130,7 @@
                 if(ball.connect(tempBall.x, tempBall.y)){
                     ctx.moveTo(ball.x, ball.y);
                     ctx.lineTo(tempBall.x, tempBall.y);
-                    ctx.strokeStyle = ball.color;
+                    ctx.strokeStyle = "#eee";
                     ctx.stroke();
                     count++;
                 }
@@ -149,10 +151,13 @@
                 ball.Ycheck();
 
                 this.line(ball);
-                ball.fill();
             }
             if (this.userMouse) {
                 this.line(this.userMouse);
+            }
+              for(let i = 0; i < this.balls.length; i++ ){
+                const ball = this.balls[i];
+                ball.fill();
             }
         }
 
