@@ -7,7 +7,7 @@
     <title>Document</title>
     <style>
         *{margin:0; padding:0;}
-        canvas{border: 1px solid black; position: relative;left:50%;transform: translateX(-50%);top:50px;background-color: rgba(0,0,0,0.5)}
+        canvas{border: 1px solid black; position: relative;left:50%;transform: translateX(-50%);top:50px;background-color: #fff}
     </style>
 </head>
 <body>
@@ -24,7 +24,7 @@
             this.speed = 0.3;
             this.size = 3;
             this.range = isMouse ? 150 : 100;
-            this.color = "#aaa";
+            this.color = "#"  +  Math.floor(Math.random() * 16777215).toString(16);;
             this.Xspeed = this.speed;
             this.Yspeed = this.speed;
             this.isMouse = isMouse;
@@ -66,13 +66,14 @@
         constructor() {
             this.start = this.start.bind(this);
             this.createBall = this.createBall.bind(this);
+            this.mouseLeave = this.mouseLeave.bind(this);
             this.mouseMove = this.mouseMove.bind(this);
             this.addBall = this.addBall.bind(this);
             this.init = this.init.bind(this);
 
             this.defaultLength = 70;
             this.balls = []; // 저장
-            this.userMouse = new Ball(null, null, true);
+            this.userMouse = null;
             this.init(); // 생성
         }
 
@@ -104,9 +105,10 @@
         }
 
         mouseLeave(e) {
+            console.log("leave")
             this.userMouse = null;
+            ctx.clearRect(0, 0, c.width, c.height);
         }
-
 
         addBall(e) {
             const ball = new Ball(e.offsetX, e.offsetY);
