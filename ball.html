@@ -25,8 +25,8 @@
             this.size = 3;
             this.range = isMouse ? 150 : 100;
             this.color = "#"  +  Math.floor(Math.random() * 16777215).toString(16);;
-            this.Xspeed = this.speed;
-            this.Yspeed = this.speed;
+            this.Xspeed = this.random(0, 10) <= 5 ? this.speed : this.speed *= -1;
+            this.Yspeed = this.random(0, 10) <= 5 ? this.speed : this.speed *= -1;
             this.isMouse = isMouse;
             this.x = x || this.random(this.size, c.width - this.size);
             this.y = y || this.random(this.size, c.height - this.size);
