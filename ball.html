@@ -20,28 +20,26 @@
 
     class Ball {
 
-        constructor() {
-            this.speed = 0.3; // 댕그라미 속도
-            this.size = 3; // 댕그라미 크기
-            this.range = 100; // 연결이 가능한 범위
-            this.color = "#aaa"; // 색깔
-            this.Xspeed = this.speed; // 현재 이동하는 x +-
-            this.Yspeed = this.speed; // 현재 이동하는 y +-
-            this.x = this.random(this.size, c.width - this.size); // 시작 x
-            this.y = this.random(this.size, c.height - this.size); // 시작 y
+        constructor(x = null, y = null, isMouse = false) {
+            this.speed = 0.3;
+            this.size = 3;
+            this.range = isMouse ? 150 : 100;
+            this.color = "#aaa";
+            this.Xspeed = this.speed;
+            this.Yspeed = this.speed;
+            this.isMouse = isMouse;
+            this.x = x || this.random(this.size, c.width - this.size);
+            this.y = y || this.random(this.size, c.height - this.size);
         }
 
-        // min ~ max 사이의 랜덤값
         random(min, max){
             return Math.random() * (max - min + 1) + min;
         }
 
-        // 자신과 연결이 가능한지
         connect(x, y) {
             return (Math.abs(x - this.x) <= this.range) && (Math.abs(y - this.y) <= this.range) ? true : false;
         }
 
-        // x가 최대값 또는 최소값일때 
         Xcheck() {
             if(((this.x + this.size) >= c.width) || this.x <= this.size){
                 this.Xspeed *= -1;
@@ -49,7 +47,6 @@
             }
         }
 
-        // y가 최대값 또는 최소값일때 
         Ycheck() {
             if(((this.y + this.size) >= c.height) || this.y <= this.size){
                 this.Yspeed *= -1;
@@ -57,7 +54,6 @@
             }
         }
         
-        //댕그라미 그리기
         fill() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
@@ -68,36 +64,64 @@
 
     class Play {
         constructor() {
-            this.start = this.start.bind(this); // start메소드에 this 바인드
-            this.length = 70; //댕그라미 최대 갯수
-            this.ball = []; // 댕그라미 저장
-            this.init(); // 댕그라미 생성
-            this.start(); // 실행
+            this.start = this.start.bind(this);
+            this.createBall = this.createBall.bind(this);
+            this.mouseMove = this.mouseMove.bind(this);
+            this.addBall = this.addBall.bind(this);
+            this.init = this.init.bind(this);
+
+            this.defaultLength = 70;
+            this.balls = []; // 저장
+            this.userMouse = new Ball(null, null, true);
+            this.init(); // 생성
         }
 
         init() {
-            for(let i = 0; i < this.length; i++ ){
+            for(let i = 0; i < this.defaultLength; i++ ) {
                 const ball = new Ball();
-
-                if(ball.random(0,10) >= 5){
-                    ball.Xspeed *= -1;
-                    ball.Yspeed *= -1;
-                }
-
-                ball.fill();
-                this.ball.push(ball);
+                this.createBall(ball)
             }
+            c.addEventListener("click", this.addBall);
+            c.addEventListener("mousemove", this.mouseMove);
+            c.addEventListener("mouseleave", this.mouseLeave);
+            this.start(); // 실행
+        }
+
+        createBall(ball) {
+            if(ball.random(0,10) >= 5) {
+                ball.Xspeed *= -1;
+                ball.Yspeed *= -1;
+            }
+
+            this.balls.push(ball);
+            ball.fill();
+        }
+
+        mouseMove(e) {
+            if (this.userMouse === null) this.userMouse = new Ball(null, null, true);
+            this.userMouse.x = e.offsetX;
+            this.userMouse.y = e.offsetY;
+        }
+
+        mouseLeave(e) {
+            this.userMouse = null;
+        }
+
+
+        addBall(e) {
+            const ball = new Ball(e.offsetX, e.offsetY);
+            this.createBall(ball);
         }
 
         line(ball) {
             let count = 0;
-            const max = 3; // 최대 연결 가능한 라인
+            const max = ball.isMouse ? 20 : 3; // 최대 연결 가능한 라인
 
-            for(let i = 0; i < this.length; i++){
-                if(ball == this.ball[i]) continue;
+            for(let i = 0; i < this.balls.length; i++){
+                if(ball == this.balls[i]) continue;
                 if(count >= max) break;
 
-                const tempBall = this.ball[i];
+                const tempBall = this.balls[i];
 
                 if(ball.connect(tempBall.x, tempBall.y)){
                     ctx.moveTo(ball.x, ball.y);
@@ -108,15 +132,14 @@
                 }
 
             }
-
         }
 
         start() {
             requestAnimationFrame(this.start);
             ctx.clearRect(0, 0, c.width, c.height);
 
-            for(let i = 0; i < this.length; i++ ){
-                const ball = this.ball[i];
+            for(let i = 0; i < this.balls.length; i++ ){
+                const ball = this.balls[i];
                 ball.x += ball.Xspeed;
                 ball.y += ball.Yspeed;
 
@@ -124,16 +147,15 @@
                 ball.Ycheck();
 
                 this.line(ball);
-
                 ball.fill();
-                this.ball.push(ball);
             }
-
+            if (this.userMouse) {
+                this.line(this.userMouse);
+            }
         }
 
     }
     
     const play = new Play();
-
 </script>
 </html>
