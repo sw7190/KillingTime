@@ -14,8 +14,7 @@
     <canvas width="1000" height="500" id="c"></canvas>
 </body>
 <script>
-
-    const c = document.getElementById("c");
+   const c = document.getElementById("c");
     const ctx = c.getContext("2d");
     const colors = ["#2EB67D", "#ECB22E", "#E01E5B", "#36C5F0"];  
 
@@ -23,8 +22,8 @@
 
         constructor(x = null, y = null, isMouse = false) {
             this.speed = 0.3;
-            this.size = this.random(2, 6);
-            this.range = isMouse ? 150 : 100;
+            this.size = this.random(0, 6);
+            this.range = isMouse ? 200 : 100;
             this.color = colors[Math.floor(this.random(0, colors.length - 1))]
             this.Xspeed = this.random(-1, 1);
             this.Yspeed = this.random(-1, 1);
@@ -122,7 +121,7 @@
         line(ball) {
            
             let count = 0;
-            const max = ball.isMouse ? 10 : 5; // 최대 연결 가능한 라인
+            const max = ball.isMouse ? 10 : 30; // 최대 연결 가능한 라인
             for(let i = 0; i < this.balls.length; i++){
                 if(ball == this.balls[i]) continue;
                 if(count >= max && ball.isMouse) break;
@@ -141,8 +140,10 @@
                     // }
                 }
                 if(isPossible) {
-                    if (!ball.isMouse && ball.connected.length < max && tempBall.connected.length < max) {
+                    if (findedIndex === -1 && !ball.isMouse && ball.connected.length < max && tempBall.connected.length < max) {
                         ball.connected.push(tempBall);
+                        const tempFindedIndex = tempBall.connected.findIndex((b) => b === ball);
+                        if (tempFindedIndex === -1) tempBall.connected.push(ball);
                     } 
                     if (ball.isMouse) {
                         ctx.moveTo(ball.x, ball.y);
