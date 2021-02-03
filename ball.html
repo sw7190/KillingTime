@@ -15,21 +15,23 @@
 </body>
 <script>
 
-const c = document.getElementById("c");
+    const c = document.getElementById("c");
     const ctx = c.getContext("2d");
+    const colors = ["#2EB67D", "#ECB22E", "#E01E5B", "#36C5F0"];  
 
     class Ball {
 
         constructor(x = null, y = null, isMouse = false) {
             this.speed = 0.3;
-            this.size = this.random(2, 10);
+            this.size = this.random(2, 6);
             this.range = isMouse ? 150 : 100;
-            this.color = "#"  +  Math.floor(Math.random() * 16777215).toString(16);;
+            this.color = colors[Math.floor(this.random(0, colors.length - 1))]
             this.Xspeed = this.random(-1, 1);
             this.Yspeed = this.random(-1, 1);
             this.isMouse = isMouse;
             this.x = x || this.random(this.size, c.width - this.size);
             this.y = y || this.random(this.size, c.height - this.size);
+            this.connected = [];
         }
 
         random(min, max){
@@ -56,6 +58,7 @@ const c = document.getElementById("c");
         
         fill() {
             ctx.beginPath();
+
             ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
             ctx.fillStyle = this.color;
             ctx.fill();
@@ -71,7 +74,7 @@ const c = document.getElementById("c");
             this.addBall = this.addBall.bind(this);
             this.init = this.init.bind(this);
 
-            this.defaultLength = 70;
+            this.defaultLength = 100;
             this.balls = []; // 저장
             this.userMouse = null;
             this.init(); // 생성
@@ -105,7 +108,6 @@ const c = document.getElementById("c");
         }
 
         mouseLeave(e) {
-            console.log("leave")
             this.userMouse = null;
             ctx.clearRect(0, 0, c.width, c.height);
         }
@@ -118,30 +120,44 @@ const c = document.getElementById("c");
         }
 
         line(ball) {
+           
             let count = 0;
             const max = ball.isMouse ? 20 : 3; // 최대 연결 가능한 라인
-
             for(let i = 0; i < this.balls.length; i++){
                 if(ball == this.balls[i]) continue;
-                if(count >= max) break;
+                if(count >= max && ball.isMouse) break;
 
                 const tempBall = this.balls[i];
+                
+                const findedIndex = ball.connected.findIndex((b) => b === tempBall);
+           
+                const isPossible = ball.connect(tempBall.x, tempBall.y)
 
-                if(ball.connect(tempBall.x, tempBall.y)){
-                    ctx.moveTo(ball.x, ball.y);
-                    ctx.lineTo(tempBall.x, tempBall.y);
-                    ctx.strokeStyle = "#eee";
-                    ctx.stroke();
+                if (!isPossible && findedIndex !== -1 && !ball.isMouse) {
+                    ball.connected.splice(findedIndex, 1);
+                    const tempFindedIndex = tempBall.connected.findIndex((b) => b === ball);
+                    if (tempFindedIndex !== -1) {
+                        tempBall.connected.splice(tempFindedIndex, 1);
+                    }
+                }
+                if(isPossible) {
+                    if (findedIndex === -1 && !ball.isMouse && ball.connected.length < max && tempBall.connected.length < max) {
+                        ball.connected.push(tempBall);
+                    } 
+                    if (ball.isMouse) {
+                        ctx.moveTo(ball.x, ball.y);
+                        ctx.lineTo(tempBall.x, tempBall.y);
+                        ctx.strokeStyle = '#08080804';
+                        ctx.stroke();
+                    }
                     count++;
                 }
-
             }
         }
 
         start() {
             requestAnimationFrame(this.start);
             ctx.clearRect(0, 0, c.width, c.height);
-
             for(let i = 0; i < this.balls.length; i++ ){
                 const ball = this.balls[i];
                 ball.x += ball.Xspeed;
@@ -155,10 +171,26 @@ const c = document.getElementById("c");
             if (this.userMouse) {
                 this.line(this.userMouse);
             }
-              for(let i = 0; i < this.balls.length; i++ ){
-                const ball = this.balls[i];
-                ball.fill();
-            }
+            this.balls.forEach((ball) => {
+                ball.connected.forEach((tempBall) => {
+                    const findedIndex = tempBall.connected.findIndex((b) => b === ball);
+                    if (findedIndex !== -1) {
+                        tempBall.connected.splice(findedIndex, 1);
+                    }
+                })
+            })
+            this.balls.forEach((ball) => {
+                ball.connected.forEach((tempBall) => {
+                    const findedIndex = ball.connected.findIndex((b) => b === tempBall);
+                    ctx.beginPath();
+                    ctx.moveTo(ball.x, ball.y);
+                    ctx.lineTo(tempBall.x, tempBall.y);
+                    ctx.strokeStyle = '#08080829';
+                    ctx.stroke();
+                })
+            })
+            this.balls.forEach((ball) => ball.fill())
+
         }
 
     }
