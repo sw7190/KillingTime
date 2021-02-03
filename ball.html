@@ -122,7 +122,7 @@
         line(ball) {
            
             let count = 0;
-            const max = ball.isMouse ? 20 : 3; // 최대 연결 가능한 라인
+            const max = ball.isMouse ? 10 : 5; // 최대 연결 가능한 라인
             for(let i = 0; i < this.balls.length; i++){
                 if(ball == this.balls[i]) continue;
                 if(count >= max && ball.isMouse) break;
@@ -135,13 +135,13 @@
 
                 if (!isPossible && findedIndex !== -1 && !ball.isMouse) {
                     ball.connected.splice(findedIndex, 1);
-                    const tempFindedIndex = tempBall.connected.findIndex((b) => b === ball);
-                    if (tempFindedIndex !== -1) {
-                        tempBall.connected.splice(tempFindedIndex, 1);
-                    }
+                    // const tempFindedIndex = tempBall.connected.findIndex((b) => b === ball);
+                    // if (tempFindedIndex !== -1) {
+                    //     tempBall.connected.splice(tempFindedIndex, 1);
+                    // }
                 }
                 if(isPossible) {
-                    if (findedIndex === -1 && !ball.isMouse && ball.connected.length < max && tempBall.connected.length < max) {
+                    if (!ball.isMouse && ball.connected.length < max && tempBall.connected.length < max) {
                         ball.connected.push(tempBall);
                     } 
                     if (ball.isMouse) {
@@ -171,21 +171,13 @@
             if (this.userMouse) {
                 this.line(this.userMouse);
             }
+
             this.balls.forEach((ball) => {
                 ball.connected.forEach((tempBall) => {
-                    const findedIndex = tempBall.connected.findIndex((b) => b === ball);
-                    if (findedIndex !== -1) {
-                        tempBall.connected.splice(findedIndex, 1);
-                    }
-                })
-            })
-            this.balls.forEach((ball) => {
-                ball.connected.forEach((tempBall) => {
-                    const findedIndex = ball.connected.findIndex((b) => b === tempBall);
                     ctx.beginPath();
                     ctx.moveTo(ball.x, ball.y);
                     ctx.lineTo(tempBall.x, tempBall.y);
-                    ctx.strokeStyle = '#08080829';
+                    ctx.strokeStyle = '#08080804';
                     ctx.stroke();
                 })
             })
